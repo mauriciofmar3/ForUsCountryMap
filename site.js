@@ -11,6 +11,33 @@ canvas = document.createElement('canvas');
 canvas.height = height; 
 canvas.width = width; 
 canvas.id = 'canvas';
+initializeCities();
+initializeEdges();
+
+function initializeCities(){
+	for(var i = 0; i < numCities; ++i) {
+		var x = Math.floor((Math.random()*(width-pixDimension))+1);
+		var y = Math.floor((Math.random()*(height-pixDimension))+1);
+		cities.push(new City(x,y));
+	}
+}
+
+function initializeEdges(){	
+	for(var i = 0; i < numCities; ++i) {
+		for(var j = i; j < numCities; ++j) {
+			if(i != j) {
+				var distance = Math.sqrt(Math.abs(Math.pow(cities[i].xPos - cities[j].xPos, 2)) 
+															+ Math.abs(Math.pow(cities[i].yPos - cities[j].yPos, 2)));
+																					
+				var chance =  Math.floor(Math.sqrt(randInt(width)*randInt(width) + randInt(height)*randInt(height)))/6;
+				if(chance > distance) {
+					cities[i].neighbors.push(cities[j]);
+					cities[j].neighbors.push(cities[i]);
+				}
+			}
+		}
+	}
+}
 
 function initializeShortestPath(cities, city1, city2) {
 	clearCityVisits(cities);
@@ -21,7 +48,6 @@ function initializeShortestPath(cities, city1, city2) {
 		for(var i = 0; i < city.neighbors.length; ++i) {
 			if(!city.neighbors[i].distance || city.neighbors[i].distance > city.distance + pythDistance(city,city.neighbors[i])) {
 				city.neighbors[i].distance = city.distance + pythDistance(city, city.neighbors[i]);
-				console.log(city.neighbors[i].distance);
 				city.neighbors[i].path = city;
 				toVisit.push(city.neighbors[i]);
 			}
@@ -51,49 +77,27 @@ function clearCityVisits(cities) {
 
 function addCityListeners() { 
 	$('.city').on('click', function() {
-		// console.log('fdjsk');
 		var highlights = $('.highlighted');
 		if(highlights.length < 2)
 			this.className += ' highlighted';
 		if(highlights.length == 1) {
-			// console.log(cities + " " + cities[highlights[0].id.substring(4)] + " " + cities[this.id.substring(4)]);
 			initializeShortestPath(cities, cities[highlights[0].id.substring(4)], cities[this.id.substring(4)]);
 			showShortestPath(cities[highlights[0].id.substring(4)], cities[this.id.substring(4)]);
 		}
 		if(highlights.length == 2) {
 			for(var i = 0; i < 2; ++i)
 				highlights[i].className = 'city';
+			drawPaths(cities);
 		}
 	});
 }
 
 
-for(var i = 0; i < numCities; ++i) {
-	var x = Math.floor((Math.random()*(width-pixDimension))+1);
-	var y = Math.floor((Math.random()*(height-pixDimension))+1);
-	cities.push(new City(x,y));
-}
-
-for(var i = 0; i < numCities; ++i) {
-	for(var j = i; j < numCities; ++j) {
-		if(i != j) {
-			var distance = Math.sqrt(Math.abs(Math.pow(cities[i].xPos - cities[j].xPos, 2)) 
-														+ Math.abs(Math.pow(cities[i].yPos - cities[j].yPos, 2)));
-																				
-			var chance =  Math.floor(Math.sqrt(randInt(width)*randInt(width) + randInt(height)*randInt(height)))/6;
-			if(chance > distance) {
-				cities[i].neighbors.push(cities[j]);
-				cities[j].neighbors.push(cities[i]);
-			}
-		}
-	}
-}
 
 $(function () {
 	$('body').append($(canvas));
 	$('#canvas').height(height-20);
 	$('#canvas').width(width-20);
-	// $('#canvas').css("border","1px solid #d3d3d3");
 	$('#canvas').css("margin-left","-8px");
 	$('#canvas').css("margin-top","-8px");
 	drawCities(cities);
@@ -102,6 +106,9 @@ $(function () {
 });
 
 function drawPaths(cities) {
+	var c=document.getElementById("canvas");
+	var ctx=c.getContext("2d");
+	ctx.clearRect(0, 0, width, height);
 	for(var i = 0; i < cities.length; ++i) {
 		for(var j = 0; j < cities[i].neighbors.length; ++j) {
 			drawPath(cities[i], cities[i].neighbors[j], null);
@@ -116,6 +123,10 @@ function drawPath(city1, city2, color) {
 		if(color != null) {
 			ctx.strokeStyle = color;
 			ctx.lineWidth = 4;
+		}
+		else {
+			ctx.strokeStyle = "black";
+			ctx.lineWidth = 2;
 		}
 		ctx.moveTo(city1.xPos + pixDimension, city1.yPos + pixDimension);
 		ctx.lineTo(city2.xPos + pixDimension, city2.yPos + pixDimension);
@@ -135,7 +146,6 @@ function drawCities(cities) {
 		image.style.height = pixDimension + "px";
 		image.style.width = pixDimension + "px";
 		element.appendChild(image);
-		// console.log(element);
 		$('body').append($(element));
 	}
 }
