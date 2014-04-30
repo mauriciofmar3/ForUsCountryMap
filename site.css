@@ -1,0 +1,5 @@
+.highlighted {
+	border: 3px solid yellow;
+	margin-left: -3px; 
+	margin-top: -3px;
+}
