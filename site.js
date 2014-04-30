@@ -24,16 +24,14 @@ function initializeCities(){
 
 function initializeEdges(){	
 	for(var i = 0; i < numCities; ++i) {
-		for(var j = i; j < numCities; ++j) {
-			if(i != j) {
-				var distance = Math.sqrt(Math.abs(Math.pow(cities[i].xPos - cities[j].xPos, 2)) 
-															+ Math.abs(Math.pow(cities[i].yPos - cities[j].yPos, 2)));
-																					
-				var chance =  Math.floor(Math.sqrt(randInt(width)*randInt(width) + randInt(height)*randInt(height)))/6;
-				if(chance > distance) {
-					cities[i].neighbors.push(cities[j]);
-					cities[j].neighbors.push(cities[i]);
-				}
+		for(var j = i + 1; j < numCities; ++j) {
+			var distance = Math.sqrt(Math.abs(Math.pow(cities[i].xPos - cities[j].xPos, 2)) 
+														+ Math.abs(Math.pow(cities[i].yPos - cities[j].yPos, 2)));
+																				
+			var chance =  Math.floor(Math.sqrt(randInt(width)*randInt(width) + randInt(height)*randInt(height)))/6;
+			if(chance > distance) {
+				cities[i].neighbors.push(cities[j]);
+				cities[j].neighbors.push(cities[i]);
 			}
 		}
 	}
