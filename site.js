@@ -22,16 +22,29 @@ function initializeCities(){
 	}
 }
 
-function initializeEdges(){	
+
+// Sorts other cities by distance, gives each in turn a large chance of being connected
+function initializeEdges(){
 	for(var i = 0; i < numCities; ++i) {
-		for(var j = i + 1; j < numCities; ++j) {
-			var distance = Math.sqrt(Math.abs(Math.pow(cities[i].xPos - cities[j].xPos, 2)) 
-														+ Math.abs(Math.pow(cities[i].yPos - cities[j].yPos, 2)));
-																				
-			var chance =  Math.floor(Math.sqrt(randInt(width)*randInt(width) + randInt(height)*randInt(height)))/6;
-			if(chance > distance) {
-				cities[i].neighbors.push(cities[j]);
-				cities[j].neighbors.push(cities[i]);
+		arr = new Array();
+		for(var j = 0; j < numCities; ++j) 
+			arr.push(cities[j]);
+		arr.sort(function(a, b) {
+			return pythDistance(cities[i], a) - pythDistance(cities[i], b);
+		});
+		var neighbors = Math.min(cities.length, Math.max(2, randInt(10+Math.log(cities.length))));
+		var index = -1;
+		while(neighbors > 0) {
+			++index
+			if(cities[i].neighbors.indexOf(arr[index]) >= 0) {
+				neighbors--;
+				continue;
+			}
+			var chance = randInt(100);
+			if(chance < 98 || cities.length-index == 0) {
+				cities[i].neighbors.push(arr[index]);
+				arr[index].neighbors.push(cities[i]);
+				neighbors--;
 			}
 		}
 	}
@@ -89,8 +102,6 @@ function addCityListeners() {
 		}
 	});
 }
-
-
 
 $(function () {
 	$('body').append($(canvas));
